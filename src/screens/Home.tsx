@@ -20,7 +20,7 @@ const Home = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [groups, setGrops] = useState<string[]>([]);
   const [exercises, setExercises] = useState<ExerciseDTO[]>([]);
-  const [groupSelected, setGroupSelected] = useState("costas");
+  const [groupSelected, setGroupSelected] = useState("antebraço");
 
   const toast = useToast();
   const navigation = useNavigation<AppNavigatorRoutesProps>();

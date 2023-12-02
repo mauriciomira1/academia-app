@@ -59,7 +59,7 @@ const Profile = () => {
         setUserPhoto(photoSelected.assets[0].uri);
       }
     } catch (error) {
-      console.log(error);
+      throw error;
     } finally {
       setPhotoIsLoading(false);
     }

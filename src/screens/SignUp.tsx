@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import {
   VStack,
   HStack,
@@ -6,19 +8,26 @@ import {
   Center,
   Heading,
   ScrollView,
+  useToast,
 } from "native-base";
 
 import { useNavigation } from "@react-navigation/native";
 
-import { useForm, Controller } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 
-import BackgroundImg from "@assets/background.png";
-import LogoSvg from "@assets/logo.svg";
+import { api } from "@services/api";
+
+import { AppError } from "@utils/AppError";
+import { useAuth } from "@hooks/useAuth";
+
 import Input from "@components/Input";
 import Button from "@components/Button";
+
+import BackgroundImg from "@assets/background.png";
+import LogoSvg from "@assets/logo.svg";
 
 type FormDataProps = {
   name: string;
@@ -42,6 +51,7 @@ const signUpSchema = yup.object({
 });
 
 const SignUp = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const {
     control,
     handleSubmit,
@@ -52,12 +62,35 @@ const SignUp = () => {
 
   const navigation = useNavigation();
 
+  const toast = useToast();
+
+  const { signIn } = useAuth();
+
   const handleGoBack = () => {
     navigation.goBack();
   };
 
-  const handleSignUp = (data: FormDataProps) => {
-    console.log(data);
+  const handleSignUp = async ({ name, email, password }: FormDataProps) => {
+    try {
+      setIsLoading(true);
+
+      await api.post("/users", { name, email, password });
+
+      signIn(email, password);
+    } catch (error) {
+      setIsLoading(false);
+
+      const isAppError = error instanceof AppError;
+      const title = isAppError
+        ? error.message
+        : "Não foi possível criar a conta. Tente mais tarde.";
+
+      toast.show({
+        title,
+        placement: "top",
+        bgColor: "red.500",
+      });
+    }
   };
 
   return (
@@ -76,7 +109,7 @@ const SignUp = () => {
         <Center my={24}>
           <HStack space={0} w="48" alignItems="center" justifyContent="center">
             <LogoSvg />
-            <Heading color="gray.100" fontFamily="heading" fontFamily="heading">
+            <Heading color="gray.100" fontFamily="heading">
               Academia APP
             </Heading>
           </HStack>
@@ -152,6 +185,7 @@ const SignUp = () => {
           <Button
             title="Criar e acessar"
             onPress={handleSubmit(handleSignUp)}
+            isLoading={isLoading}
           />
         </Center>
 

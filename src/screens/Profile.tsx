@@ -32,13 +32,14 @@ const PHOTO_SIZE = 33;
 type FormDataProps = {
   name: string;
   email: string;
-  password: string;
-  old_password: string;
-  confirm_password: string;
+  old_password?: string;
+  password?: string;
+  confirm_password?: string;
 };
 
 const profileSchema = yup.object({
   name: yup.string().required("Informe o nome."),
+  email: yup.string(),
   password: yup
     .string()
     .min(6, "A nova senha deve ter pelo menos 6 caracteres.")

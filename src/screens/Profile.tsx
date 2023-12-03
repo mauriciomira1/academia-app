@@ -26,6 +26,8 @@ import UserPhoto from "@components/UserPhoto";
 import ScreenHeader from "@components/ScreenHeader";
 import { Controller, useForm } from "react-hook-form";
 import { useAuth } from "@hooks/useAuth";
+import { api } from "@services/api";
+import { AppError } from "@utils/AppError";
 
 const PHOTO_SIZE = 33;
 
@@ -61,13 +63,14 @@ const profileSchema = yup.object({
 });
 
 const Profile = () => {
+  const [isUpdating, setIsUpdating] = useState(false);
   const [photoIsLoading, setPhotoIsLoading] = useState(false);
   const [userPhoto, setUserPhoto] = useState(
     "https://github.com/mauriciomira1.png"
   );
 
   const toast = useToast();
-  const { user } = useAuth();
+  const { user, updateUserProfile } = useAuth();
   const {
     control,
     handleSubmit,
@@ -114,7 +117,34 @@ const Profile = () => {
   };
 
   const handleProfileSubmit = async (data: FormDataProps) => {
-    console.log(data);
+    try {
+      setIsUpdating(true);
+
+      const userUpdated = user;
+      userUpdated.name = data.name;
+
+      await api.put("/users", data);
+
+      await updateUserProfile(userUpdated);
+      toast.show({
+        title: "Perfil atualizado com sucesso",
+        placement: "top",
+        bgColor: "green.500",
+      });
+    } catch (error) {
+      const isAppError = error instanceof AppError;
+      const title = isAppError
+        ? error.message
+        : "Não foi possível atualizar os dados. Tente mais tarde.";
+
+      toast.show({
+        title,
+        placement: "top",
+        bgColor: "red.500",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
   };
   return (
     <VStack flex={1}>
@@ -226,6 +256,7 @@ const Profile = () => {
           <Button
             title="Atualizar"
             onPress={handleSubmit(handleProfileSubmit)}
+            isLoading={isUpdating}
           />
         </VStack>
       </ScrollView>

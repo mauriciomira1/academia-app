@@ -20,14 +20,20 @@ import * as ImagePicker from "expo-image-picker";
 
 import * as yup from "yup";
 
+import { Controller, useForm } from "react-hook-form";
+
 import Input from "@components/Input";
 import Button from "@components/Button";
 import UserPhoto from "@components/UserPhoto";
 import ScreenHeader from "@components/ScreenHeader";
-import { Controller, useForm } from "react-hook-form";
+
 import { useAuth } from "@hooks/useAuth";
+
 import { api } from "@services/api";
+
 import { AppError } from "@utils/AppError";
+
+import UserPhotoDefault from "@assets/userPhotoDefault.png";
 
 const PHOTO_SIZE = 33;
 
@@ -119,11 +125,19 @@ const Profile = () => {
         const userPhotoUploadForm = new FormData();
         userPhotoUploadForm.append("avatar", photoFile);
 
-        await api.patch("/users/avatar", userPhotoUploadForm, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        const avatarUpdatedResponse = await api.patch(
+          "/users/avatar",
+          userPhotoUploadForm,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        const userUpdated = user;
+        userUpdated.avatar = avatarUpdatedResponse.data.avatar;
+        updateUserProfile(userUpdated);
 
         toast.show({
           title: "Foto atualizada!",
@@ -184,7 +198,11 @@ const Profile = () => {
             />
           ) : (
             <UserPhoto
-              source={{ uri: userPhoto }}
+              source={
+                user.avatar
+                  ? { uri: `${api.defaults.baseURL}/avatar/${user.avatar}` }
+                  : UserPhotoDefault
+              }
               size={PHOTO_SIZE}
               alt="Foto do usuário"
             />

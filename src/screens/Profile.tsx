@@ -48,7 +48,15 @@ const profileSchema = yup.object({
     .string()
     .nullable()
     .transform((value) => (!!value ? value : null))
-    .oneOf([yup.ref("password"), undefined], "A senhas não conferem."),
+    .oneOf([yup.ref("password"), undefined], "A senhas não conferem.")
+    .when("password", {
+      is: (Field: any) => Field,
+      then: (schema) =>
+        schema
+          .nullable()
+          .required("Informe a confirmação da senha.")
+          .transform((value) => (!!value ? value : null)),
+    }),
 });
 
 const Profile = () => {

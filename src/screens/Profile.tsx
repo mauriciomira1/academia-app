@@ -107,7 +107,16 @@ const Profile = () => {
           });
         }
 
-        setUserPhoto(photoSelected.assets[0].uri);
+        const fileExtension = photoSelected.assets[0].uri.split(".").pop();
+        const firstName = user.name.split(" ").shift();
+
+        const photoFile = {
+          name: `${firstName}.${fileExtension}`.toLowerCase(),
+          uri: photoSelected.assets[0].uri,
+          type: `${photoSelected.assets[0].type}/${fileExtension}`,
+        };
+
+        console.log(photoFile);
       }
     } catch (error) {
       throw error;

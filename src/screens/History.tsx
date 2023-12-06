@@ -11,6 +11,7 @@ import { HistoryByDayDTO } from "@dtos/HistoryByDayDTO";
 
 import HistoryCard from "@components/HistoryCard";
 import ScreenHeader from "@components/ScreenHeader";
+import { Loading } from "@components/Loading";
 
 const History = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -19,6 +20,7 @@ const History = () => {
   const toast = useToast();
 
   const fetchHistory = async () => {
+    setIsLoading(true);
     try {
       const response = await api.get("/history");
 
@@ -35,6 +37,7 @@ const History = () => {
         bgColor: "red.500",
       });
     } finally {
+      setIsLoading(false);
     }
   };
 
@@ -67,12 +70,16 @@ const History = () => {
         contentContainerStyle={
           exercises.length === 0 && { flex: 1, justifyContent: "center" }
         }
-        ListEmptyComponent={() => (
-          <Text color="white" fontSize="sm" textAlign="center">
-            Não há exercícios registrados ainda. {"\n"}Vamos fazer exercícios
-            hoje?
-          </Text>
-        )}
+        ListEmptyComponent={() =>
+          isLoading ? (
+            <Loading />
+          ) : (
+            <Text color="white" fontSize="sm" textAlign="center">
+              Não há exercícios registrados ainda. {"\n"}Vamos fazer exercícios
+              hoje?
+            </Text>
+          )
+        }
         showsVerticalScrollIndicator={false}
       />
     </VStack>
